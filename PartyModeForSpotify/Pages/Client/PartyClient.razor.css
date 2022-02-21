@@ -1,0 +1,5 @@
+﻿::deep .search-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    margin-bottom: 12px;
+}

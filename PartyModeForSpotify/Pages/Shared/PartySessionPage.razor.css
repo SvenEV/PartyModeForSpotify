@@ -1,0 +1,47 @@
+﻿.root {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    color: white;
+    overflow: hidden;
+}
+
+header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    background: linear-gradient(#0e4415, #06220a);
+    padding: 0 min(4vw, 42px);
+}
+
+.qr-code {
+    display: grid;
+    opacity: .5;
+    width: min(15vw, 120px);
+    height: min(15vw, 120px);
+    margin: 20px 0 20px 12px;
+    background: white;
+}
+
+.qr-code img {
+    width: 100%;
+    height: 100%;
+}
+
+h1 {
+    align-self: center;
+}
+
+.session-error {
+    place-self: center;
+    min-width: 0;
+    min-height: 0;
+}
+
+main {
+    padding: min(4vw, 42px) min(4vw, 42px) 0 min(4vw, 42px);
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+}

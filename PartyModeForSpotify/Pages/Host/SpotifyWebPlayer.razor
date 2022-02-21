@@ -1,0 +1,126 @@
+﻿@inject IJSRuntime JS;
+@inject HttpClient HttpClient;
+
+@code {
+    public const string DefaultPlayerName = "Party Mode for Spotify";
+
+    private string accessToken = "";
+    private string playerName = DefaultPlayerName;
+    private double volume;
+    private bool isPaused;
+
+    private DotNetObjectReference<SpotifyWebPlayer>? selfRef;
+    private IJSObjectReference? module;
+
+    [Parameter]
+    public string? PlayerName { get; set; }
+
+    [Parameter]
+    public string? AccessToken { get; set; }
+
+    [Parameter]
+    public double Volume { get; set; } = 1;
+
+    [Parameter]
+    public bool IsPaused { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> IsPausedChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<WebPlaybackPlayer> Ready { get; set; }
+
+    [Parameter]
+    public EventCallback<WebPlaybackPlayer> NotReady { get; set; }
+
+    [Parameter]
+    public EventCallback<WebPlaybackState?> PlayerStateChanged { get; set; }
+
+    [Parameter]
+    public EventCallback AutoplayFailed { get; set; }
+
+    [Parameter]
+    public EventCallback<WebPlaybackError> Error { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        accessToken = AccessToken ?? "";
+        playerName = PlayerName ?? DefaultPlayerName;
+        volume = Volume;
+
+        selfRef = DotNetObjectReference.Create(this);
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/spotify.js");
+        await module!.InvokeVoidAsync("initialize", selfRef, PlayerName, Volume, AccessToken);
+    }
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        var wasInitialized = module is not null;
+
+        await base.SetParametersAsync(parameters);
+
+        if (wasInitialized && module is not null)
+        {
+            if (AccessToken != accessToken)
+                throw new NotSupportedException("Changing the access token after initialization is not supported");
+
+            if (PlayerName != playerName)
+            {
+                playerName = PlayerName ?? DefaultPlayerName;
+                await module.InvokeVoidAsync("setName", playerName);
+            }
+
+            if (Volume != volume)
+            {
+                volume = Math.Max(0, Math.Min(1, Volume));
+                await module.InvokeVoidAsync("setVolume", volume);
+            }
+
+            if (IsPaused && !isPaused)
+            {
+                isPaused = true;
+                await module.InvokeVoidAsync("pause");
+            }
+
+            if (!IsPaused && isPaused)
+            {
+                isPaused = false;
+                await module.InvokeVoidAsync("resume");
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        selfRef?.Dispose();
+        module?.DisposeAsync();
+    }
+
+    [JSInvokable]
+    public async Task NotifyReadyAsync(WebPlaybackPlayer args) =>
+        await Ready.InvokeAsync(args);
+
+    [JSInvokable]
+    public async Task NotifyNotReadyAsync(WebPlaybackPlayer args) =>
+        await NotReady.InvokeAsync(args);
+
+    [JSInvokable]
+    public async Task NotifyPlayerStateChangedAsync(WebPlaybackState? args)
+    {
+        if (args is not null && args.IsPaused != IsPaused)
+        {
+            isPaused = args.IsPaused;
+            await IsPausedChanged.InvokeAsync(args.IsPaused);
+        }
+
+        await PlayerStateChanged.InvokeAsync(args);
+    }
+
+    [JSInvokable]
+    public async Task NotifyAutoplayFailedAsync() =>
+        await AutoplayFailed.InvokeAsync();
+
+    [JSInvokable]
+    public async Task NotifyErrorAsync(WebPlaybackError args) =>
+        await Error.InvokeAsync(args);
+}

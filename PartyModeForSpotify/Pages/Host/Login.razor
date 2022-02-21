@@ -1,0 +1,37 @@
+﻿@page "/login"
+@using System.Web
+
+@inject SpotifyAuthenticationManager AuthenticationManager
+@inject NavigationManager NavigationManager
+@inject SessionManager SessionManager
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var queryArgs = HttpUtility.ParseQueryString(new Uri(NavigationManager.Uri).Query);
+
+        if (queryArgs["code"] is string authCode)
+        {
+            // Redirected from Spotify login page back to our app => use the given auth code to retrieve an access token
+            var accessToken = await AuthenticationManager.CompleteSignInAsync("/login", authCode);
+            OnAuthenticated(accessToken);
+        }
+        else if (AuthenticationManager.AccessToken is string accessToken)
+        {
+            // Already authenticated => redirect to target page
+            OnAuthenticated(accessToken);
+        }
+        else
+        {
+            // Not authenticated => redirect to Spotify login page
+            AuthenticationManager.SignIn("/login");
+        }
+    }
+
+    private void OnAuthenticated(string accessToken)
+    {
+        var sessionTitle = $"Party {accessToken[0..4]}";
+        var session = SessionManager.CreateSession(sessionTitle, accessToken);
+        NavigationManager.NavigateTo($"/host/{session.Id}");
+    }
+}

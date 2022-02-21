@@ -1,0 +1,69 @@
+﻿@inject SessionManager SessionManager
+@implements IDisposable
+
+@if (session is not null)
+{
+    <div class="root">
+        <header>
+            <h1>@session.Title</h1>
+
+            <div class="qr-code">
+                <img src="@session.QRCode">
+            </div>
+        </header>
+        @switch (sessionState)
+        {
+            case PartySessionState.UninitializedSession:
+                <div class="session-error">Session not initialized</div>
+                break;
+
+            case PartySessionState.BrokenSession state:
+                <div class="session-error">Party broken: @state.Exception</div>
+                break;
+
+            case PartySessionState.ActiveSession state:
+                <main>
+                    @ChildContent?.Invoke(new PartySessionArgs(session, state))
+                </main>
+                break;
+        }
+    </div>
+}
+else
+{
+    <b>The session '@SessionId' does not exist.</b>
+}
+
+@code {
+    private PartySession? session;
+    private PartySessionState sessionState = new PartySessionState.UninitializedSession();
+    private IDisposable? sessionStateSubscription;
+
+    public record PartySessionArgs(PartySession Session, PartySessionState.ActiveSession State);
+
+    [Parameter]
+    public Guid SessionId { get; set; }
+
+    [Parameter]
+    public RenderFragment<PartySessionArgs>? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        session = SessionManager.TryGetSession(SessionId);
+
+        sessionStateSubscription = session?.State.Subscribe(state =>
+        {
+            sessionState = state;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    public void Dispose()
+    {
+        if (session is not null)
+        {
+            sessionStateSubscription?.Dispose();
+            //session.Dispose();
+        }
+    }
+}

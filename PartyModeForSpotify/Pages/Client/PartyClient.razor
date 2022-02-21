@@ -1,0 +1,43 @@
+﻿@page "/client/{SessionId:guid}"
+@using System.Collections.Immutable
+
+<PartySessionPage SessionId="@SessionId">
+    <h2>Currently Playing</h2>
+
+    <TrackInfo Track="context.State.CurrentTrack?.TrackInfo" />
+
+    <h2>Search & Add to Queue</h2>
+
+    <EditForm Model="this" OnSubmit="() => OnSubmitSearch(context.Session)" Context="formContext" class="search-form">
+        <InputText @bind-Value="searchText" />
+        <button type="submit">Search</button>
+    </EditForm>
+
+    <TrackList Tracks="searchResults">
+        <Actions Context="track">
+            <button @onclick="() => EnqueueTrackAsync(track, context.Session)">
+                Add to Queue
+            </button>
+        </Actions>
+    </TrackList>
+</PartySessionPage>
+
+@code {
+    private string searchText = "";
+    private IReadOnlyList<FullTrack> searchResults = ImmutableList<FullTrack>.Empty;
+
+    [Parameter]
+    public Guid SessionId { get; set; }
+
+    private async Task OnSubmitSearch(PartySession session)
+    {
+        searchResults = await session.SearchAsync(searchText);
+    }
+
+    private async Task EnqueueTrackAsync(FullTrack track, PartySession session)
+    {
+        await session.EnqueueTrackAsync(track);
+        //searchText = "";
+        //searchResults = ImmutableList<FullTrack>.Empty;
+    }
+}

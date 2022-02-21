@@ -1,0 +1,46 @@
+﻿.track {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+}
+
+.album-cover {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+}
+
+.album-cover-placeholder {
+    width: 64px;
+    height: 64px;
+    border: 1px dashed gray;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.name {
+    font-size: larger;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album {
+    opacity: .5;
+    font-size: smaller;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.actions {
+    display: grid;
+}

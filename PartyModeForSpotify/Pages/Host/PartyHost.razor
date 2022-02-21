@@ -1,0 +1,49 @@
+﻿@page "/host/{SessionId:guid}"
+
+@inject IJSRuntime JS
+@inject HttpClient HttpClient
+@inject SessionManager SessionManager
+
+<PartySessionPage SessionId="SessionId">
+    <SpotifyWebPlayer Volume="volume"
+                      AccessToken="@context.State.AccessToken"
+                      PlayerName="@context.Session.Title"
+                      Ready="async playerInfo => await OnPlayerReadyAsync(playerInfo, context.Session)"
+                      @bind-IsPaused="isPaused"
+                      @ref="webPlayer" />
+
+    <button @onclick="() => volume = .2">20 % Volume</button>
+    <button @onclick="() => volume = 1">100 % Volume</button>
+    <button @onclick="() => context.Session.SkipToNextTrackAsync()">Skip to Next</button>
+
+    @if (isPaused)
+    {
+        <button @onclick="() => isPaused = false">Play</button>
+    }
+    else
+    {
+        <button @onclick="() => isPaused = true">Pause</button>
+    }
+
+    <h2>Currently playing</h2>
+    <TrackInfo Track="context.State.CurrentTrack?.TrackInfo" />
+
+    <h2>Up next</h2>
+    <TrackList Tracks="context.State.Queue.Select(item => item.TrackInfo)" />
+
+</PartySessionPage>
+
+@code {
+    private SpotifyWebPlayer? webPlayer;
+
+    private double volume = .5;
+    private bool isPaused = false;
+
+    [Parameter]
+    public Guid SessionId { get; set; }
+
+    private async Task OnPlayerReadyAsync(WebPlaybackPlayer playerInfo, PartySession session)
+    {
+        await session.SetHostDeviceAsync(playerInfo.DeviceId);
+    }
+}

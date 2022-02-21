@@ -1,0 +1,30 @@
+﻿@if (Track is not null)
+{
+    <div class="track">
+        <img class="album-cover" src="@Track.Album.Images.FirstOrDefault()?.Url" />
+
+        <div class="info">
+            <div class="name">@Track.Name</div>
+            <div class="artist">@string.Join("•", Track.Artists.Select(a => a.Name))</div>
+            <div class="album">@Track.Album.Name</div>
+        </div>
+
+        <div class="actions">
+            @Actions
+        </div>
+    </div>
+}
+else
+{
+    <div class="track">
+        <div class="album-cover-placeholder"></div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public FullTrack? Track { get; set; }
+
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+}

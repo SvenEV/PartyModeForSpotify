@@ -1,0 +1,27 @@
+﻿@page "/"
+
+@inject NavigationManager NavigationManager
+@inject SessionManager SessionManager
+
+<PageTitle>Party Mode for Spotify</PageTitle>
+
+<div class="root">
+    <h1>Party Mode for Spotify</h1>
+    <button @onclick="CreateSession">Host a Party</button>
+    <button @onclick="JoinSession">Join a Party</button>
+</div>
+
+@code {
+    public const string RedirectUri = "/host";
+
+    private void CreateSession()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+
+    private void JoinSession()
+    {
+        var sessionId = SessionManager.FirstSession?.Id;
+        NavigationManager.NavigateTo($"/client/{sessionId}");
+    }
+}
