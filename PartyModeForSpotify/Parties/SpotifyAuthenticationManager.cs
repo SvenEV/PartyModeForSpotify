@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using SpotifyAPI.Web;
-using System.Text.RegularExpressions;
-using System.Web;
 
-namespace ParyModeForSpotify.Parties
+namespace PartyModeForSpotify.Parties
 {
     public class SpotifyAuthenticationManager
     {

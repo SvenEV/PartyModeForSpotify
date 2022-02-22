@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 
-namespace ParyModeForSpotify.Pages.Host
+namespace PartyModeForSpotify.Pages.Host
 {
     // https://developer.spotify.com/documentation/web-playback-sdk/reference/#objects
 
@@ -18,7 +18,7 @@ namespace ParyModeForSpotify.Pages.Host
     );
 
     public record WebPlaybackTrackWindow(
-        [property: JsonPropertyName("current_track")] WebPlaybackTrack CurrentTrack,
+        [property: JsonPropertyName("current_track")] WebPlaybackTrack? CurrentTrack,
         [property: JsonPropertyName("previous_tracks")] ImmutableList<WebPlaybackTrack> PreviousTracks,
         [property: JsonPropertyName("next_tracks")] ImmutableList<WebPlaybackTrack> NextTracks
     );

@@ -1,11 +1,10 @@
-﻿using QRCoder;
-using SpotifyAPI.Web;
+﻿using SpotifyAPI.Web;
 using System.Collections.Immutable;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Subjects;
 
-namespace ParyModeForSpotify.Parties
+namespace PartyModeForSpotify.Parties
 {
     public record QueuedTrack(FullTrack TrackInfo);
     public record CurrentTrack(FullTrack TrackInfo);

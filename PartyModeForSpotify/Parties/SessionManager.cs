@@ -1,4 +1,4 @@
-﻿namespace ParyModeForSpotify.Parties
+﻿namespace PartyModeForSpotify.Parties
 {
     public class SessionManager
     {

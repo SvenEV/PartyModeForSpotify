@@ -1,5 +1,5 @@
-using ParyModeForSpotify;
-using ParyModeForSpotify.Parties;
+using PartyModeForSpotify;
+using PartyModeForSpotify.Parties;
 
 var builder = WebApplication.CreateBuilder(args);
 

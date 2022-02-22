@@ -1,4 +1,4 @@
-﻿namespace ParyModeForSpotify
+﻿namespace PartyModeForSpotify
 {
     public class SpotifyConfiguration
     {

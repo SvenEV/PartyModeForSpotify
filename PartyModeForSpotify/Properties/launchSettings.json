@@ -8,7 +8,7 @@
     }
   },
   "profiles": {
-    "ParyModeForSpotify": {
+    "PartyModeForSpotify": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
