@@ -5,30 +5,46 @@
 @inject SessionManager SessionManager
 
 <PartySessionPage SessionId="SessionId">
+
     <SpotifyWebPlayer Volume="volume"
                       AccessToken="@context.State.AccessToken"
                       PlayerName="@context.Session.Title"
                       Ready="async playerInfo => await OnPlayerReadyAsync(playerInfo, context.Session)"
+                      PlayerStateChanged="async state => await OnPlayerStateChangedAsync(state, context.Session)"
                       @bind-IsPaused="isPaused"
                       @ref="webPlayer" />
 
-    <button @onclick="() => volume = .2">20 % Volume</button>
-    <button @onclick="() => volume = 1">100 % Volume</button>
-    <button @onclick="() => context.Session.SkipToNextTrackAsync()">Skip to Next</button>
-
-    @if (isPaused)
-    {
-        <button @onclick="() => isPaused = false">Play</button>
-    }
-    else
-    {
-        <button @onclick="() => isPaused = true">Pause</button>
-    }
-
     <h2>Currently playing</h2>
+
+    <div class="controls">
+        <button @onclick="() => volume = Math.Max(0, volume - .1)">
+            <span class="icon">&#xE767;</span> -
+        </button>
+        <button @onclick="() => volume = Math.Min(1, volume + .1)">
+            <span class="icon">&#xE767;</span> +
+        </button>
+        <button @onclick="() => context.Session.SkipToNextTrackAsync()">
+            <span class="icon">&#xE893;</span> Skip
+        </button>
+
+        @if (isPaused)
+        {
+            <button @onclick="() => isPaused = false">
+                <span class="icon">&#xE768;</span> Play
+            </button>
+        }
+        else
+        {
+            <button @onclick="() => isPaused = true">
+                <span class="icon">&#xE769;</span> Pause
+            </button>
+        }
+    </div>
+
     <TrackInfo Track="context.State.CurrentTrack?.TrackInfo" />
 
     <h2>Up next</h2>
+
     <TrackList Tracks="context.State.Queue.Select(item => item.TrackInfo)" />
 
 </PartySessionPage>
@@ -38,6 +54,7 @@
 
     private double volume = .5;
     private bool isPaused = false;
+    private WebPlaybackState? previousState = null;
 
     [Parameter]
     public Guid SessionId { get; set; }
@@ -45,5 +62,18 @@
     private async Task OnPlayerReadyAsync(WebPlaybackPlayer playerInfo, PartySession session)
     {
         await session.SetHostDeviceAsync(playerInfo.DeviceId);
+    }
+
+    private async Task OnPlayerStateChangedAsync(WebPlaybackState state, PartySession session)
+    {
+        var prevState = previousState;
+        previousState = state;
+
+        if (prevState is not null && state is not null &&
+            prevState.TrackWindow.CurrentTrack?.Id == state.TrackWindow.CurrentTrack?.Id &&
+            prevState.PositionMilliseconds > 0 && state.PositionMilliseconds == 0)
+        {
+            await session.SkipToNextTrackAsync();
+        }
     }
 }

@@ -21,6 +21,7 @@
     flex-direction: column;
     overflow: hidden;
     white-space: nowrap;
+    gap: 2px;
 }
 
 .name {

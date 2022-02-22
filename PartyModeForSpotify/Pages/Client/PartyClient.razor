@@ -8,15 +8,19 @@
 
     <h2>Search & Add to Queue</h2>
 
-    <EditForm Model="this" OnSubmit="() => OnSubmitSearch(context.Session)" Context="formContext" class="search-form">
-        <InputText @bind-Value="searchText" />
-        <button type="submit">Search</button>
+    <EditForm Model="this" OnSubmit="() => OnSubmitSearch(context.Session)" Context="formContext">
+        <div class="search-form">
+            <InputText @bind-Value="searchText" />
+            <button type="submit">
+                <span class="icon">&#xE71E;</span> Search
+            </button>
+        </div>
     </EditForm>
 
     <TrackList Tracks="searchResults">
         <Actions Context="track">
-            <button @onclick="() => EnqueueTrackAsync(track, context.Session)">
-                Add to Queue
+            <button @onclick="() => context.Session.EnqueueTrackAsync(track)">
+                <span class="icon">&#xE710;</span>
             </button>
         </Actions>
     </TrackList>
@@ -32,12 +36,5 @@
     private async Task OnSubmitSearch(PartySession session)
     {
         searchResults = await session.SearchAsync(searchText);
-    }
-
-    private async Task EnqueueTrackAsync(FullTrack track, PartySession session)
-    {
-        await session.EnqueueTrackAsync(track);
-        //searchText = "";
-        //searchResults = ImmutableList<FullTrack>.Empty;
     }
 }
