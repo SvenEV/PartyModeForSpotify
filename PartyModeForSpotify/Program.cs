@@ -1,5 +1,5 @@
 using PartyModeForSpotify;
-using PartyModeForSpotify.Parties;
+using PartyModeForSpotify.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

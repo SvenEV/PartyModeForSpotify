@@ -4,11 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Subjects;
 
-namespace PartyModeForSpotify.Parties
+namespace PartyModeForSpotify.Services
 {
-    public record QueuedTrack(FullTrack TrackInfo);
-    public record CurrentTrack(FullTrack TrackInfo);
-
     public abstract record PartySessionState
     {
         private PartySessionState() { }
@@ -18,8 +15,8 @@ namespace PartyModeForSpotify.Parties
         public record ActiveSession(
             SpotifyClient SpotifyClient,
             string AccessToken,
-            CurrentTrack? CurrentTrack,
-            ImmutableQueue<QueuedTrack> Queue) : PartySessionState;
+            FullTrack? CurrentTrack,
+            ImmutableQueue<FullTrack> Queue) : PartySessionState;
 
         public record BrokenSession(Exception Exception) : PartySessionState;
 
@@ -35,7 +32,7 @@ namespace PartyModeForSpotify.Parties
 
         public Guid Id { get; }
 
-        public string Title { get; } = "INLO LAN";
+        public string Title { get; } = "Spotify Party";
 
         public string QRCode { get; }
 
@@ -58,7 +55,7 @@ namespace PartyModeForSpotify.Parties
 
             var config = SpotifyClientConfig.CreateDefault();
             var spotify = new SpotifyClient(config.WithToken(accessToken));
-            state = new(new PartySessionState.ActiveSession(spotify, accessToken, null, ImmutableQueue<QueuedTrack>.Empty));
+            state = new(new PartySessionState.ActiveSession(spotify, accessToken, null, ImmutableQueue<FullTrack>.Empty));
         }
 
         private string GenerateQRCodeUrl()
@@ -102,7 +99,7 @@ namespace PartyModeForSpotify.Parties
             {
                 state.OnNext(session with
                 {
-                    Queue = session.Queue.Enqueue(new QueuedTrack(track))
+                    Queue = session.Queue.Enqueue(track)
                 });
 
                 if (session.CurrentTrack is null)
@@ -123,16 +120,16 @@ namespace PartyModeForSpotify.Parties
 
                 await session.SpotifyClient.Player.ResumePlayback(new PlayerResumePlaybackRequest
                 {
-                    Uris = new[] { track.TrackInfo.Uri },
+                    Uris = new[] { track.Uri },
                 });
 
                 state.OnNext(session with
                 {
-                    CurrentTrack = new CurrentTrack(track.TrackInfo),
+                    CurrentTrack = track,
                     Queue = remainingQueue
                 });
 
-                logger.LogInformation(nameof(SkipToNextTrackAsync) + " '{TrackName}' ({TrackUri})", track.TrackInfo.Name, track.TrackInfo.Uri);
+                logger.LogInformation(nameof(SkipToNextTrackAsync) + " '{TrackName}' ({TrackUri})", track.Name, track.Uri);
             }
         }
 

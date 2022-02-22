@@ -41,11 +41,11 @@
         }
     </div>
 
-    <TrackInfo Track="context.State.CurrentTrack?.TrackInfo" />
+    <TrackInfo Track="context.State.CurrentTrack" />
 
     <h2>Up next</h2>
 
-    <TrackList Tracks="context.State.Queue.Select(item => item.TrackInfo)" />
+    <TrackList Tracks="context.State.Queue" />
 
 </PartySessionPage>
 

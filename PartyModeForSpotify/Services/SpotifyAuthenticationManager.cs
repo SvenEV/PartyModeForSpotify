@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using SpotifyAPI.Web;
 
-namespace PartyModeForSpotify.Parties
+namespace PartyModeForSpotify.Services
 {
     public class SpotifyAuthenticationManager
     {
