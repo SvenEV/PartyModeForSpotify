@@ -38,14 +38,14 @@ namespace PartyModeForSpotify.Services
 
         public IObservable<PartySessionState> State => state;
 
-        public PartySession(Guid id, string title, string accessToken, Action disposeCallback, ILogger<PartySession> logger)
+        public PartySession(Guid id, string title, string accessToken, Action disposeCallback, ILogger<PartySession> logger, SpotifyConfiguration spotifyConfig)
         {
             Id = id;
             Title = title;
             this.disposeCallback = disposeCallback;
             this.logger = logger;
 
-            QRCode = GenerateQRCodeUrl();
+            QRCode = GenerateQRCodeUrl(spotifyConfig.DeployUrl);
 
             loggerScope = logger.BeginScope(new
             {
@@ -58,19 +58,24 @@ namespace PartyModeForSpotify.Services
             state = new(new PartySessionState.ActiveSession(spotify, accessToken, null, ImmutableQueue<FullTrack>.Empty));
         }
 
-        private string GenerateQRCodeUrl()
+        private string GenerateQRCodeUrl(string deployUrl)
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            var ip = host.AddressList
-                .OrderByDescending(addr => addr.ToString())
-                .FirstOrDefault(addr => addr.AddressFamily == AddressFamily.InterNetwork)?
-                .ToString();
-
-            if (ip is null)
-                return "";
-
-            var clientUrl = $"https://{ip}:7078/client/{Id}";
+            var clientUrl = string.IsNullOrEmpty(deployUrl) ? GetDevelopmentUrl() : $"{deployUrl}/client/{Id}";
             return $"https://api.qrserver.com/v1/create-qr-code/?format=svg&size=120x120&qzone=2&data={clientUrl}";
+
+            string GetDevelopmentUrl()
+            {
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                var ip = host.AddressList
+                    .OrderByDescending(addr => addr.ToString())
+                    .FirstOrDefault(addr => addr.AddressFamily == AddressFamily.InterNetwork)?
+                    .ToString();
+
+                if (ip is null)
+                    return "";
+
+                return $"https://{ip}:7078/client/{Id}";
+            }
         }
 
         public async Task SetHostDeviceAsync(string deviceId)
