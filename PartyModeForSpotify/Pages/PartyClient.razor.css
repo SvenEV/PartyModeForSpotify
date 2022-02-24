@@ -3,7 +3,6 @@
     grid-template-columns: 1fr auto;
     margin-bottom: 12px;
     gap: 8px;
-/*    max-width: 500px;*/
     background: rgba(255, 255, 255, .1);
     border: 1px solid white;
     border-radius: 8px;
