@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 
-namespace PartyModeForSpotify.Pages.Host
+namespace SpotifyWebPlaybackSdk
 {
     // https://developer.spotify.com/documentation/web-playback-sdk/reference/#objects
 

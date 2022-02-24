@@ -45,7 +45,7 @@ namespace PartyModeForSpotify.Services
             this.disposeCallback = disposeCallback;
             this.logger = logger;
 
-            QRCode = GenerateQRCodeUrl(spotifyConfig.DeployUrl);
+            QRCode = GenerateQRCodeUrl(spotifyConfig.DeployUrl!);
 
             loggerScope = logger.BeginScope(new
             {
