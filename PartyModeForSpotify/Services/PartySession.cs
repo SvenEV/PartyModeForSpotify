@@ -6,26 +6,16 @@ using System.Reactive.Subjects;
 
 namespace PartyModeForSpotify.Services
 {
-    public abstract record PartySessionState
-    {
-        private PartySessionState() { }
-
-        public record UninitializedSession : PartySessionState;
-
-        public record ActiveSession(
-            SpotifyClient SpotifyClient,
-            string AccessToken,
-            FullTrack? CurrentTrack,
-            ImmutableQueue<FullTrack> Queue) : PartySessionState;
-
-        public record BrokenSession(Exception Exception) : PartySessionState;
-
-        public record ClosedSession : PartySessionState;
-    }
+    public record PartySessionState(
+        bool IsActive,
+        SpotifyClient SpotifyClient,
+        string AccessToken,
+        FullTrack? CurrentTrack,
+        ImmutableQueue<FullTrack> Queue);
 
     public class PartySession : IDisposable
     {
-        private readonly BehaviorSubject<PartySessionState> state;
+        private readonly BehaviorSubject<PartySessionState> stateSubject;
         private readonly Action disposeCallback;
         private readonly ILogger<PartySession> logger;
         private readonly IDisposable loggerScope;
@@ -36,7 +26,7 @@ namespace PartyModeForSpotify.Services
 
         public string QRCode { get; }
 
-        public IObservable<PartySessionState> State => state;
+        public IObservable<PartySessionState> State => stateSubject;
 
         public PartySession(Guid id, string title, string accessToken, Action disposeCallback, ILogger<PartySession> logger, SpotifyConfiguration spotifyConfig)
         {
@@ -55,7 +45,15 @@ namespace PartyModeForSpotify.Services
 
             var config = SpotifyClientConfig.CreateDefault();
             var spotify = new SpotifyClient(config.WithToken(accessToken));
-            state = new(new PartySessionState.ActiveSession(spotify, accessToken, null, ImmutableQueue<FullTrack>.Empty));
+
+            var initialState = new PartySessionState(
+                IsActive: true,
+                SpotifyClient: spotify,
+                AccessToken: accessToken,
+                CurrentTrack: null,
+                Queue: ImmutableQueue<FullTrack>.Empty);
+
+            stateSubject = new(initialState);
         }
 
         private string GenerateQRCodeUrl(string deployUrl)
@@ -78,20 +76,20 @@ namespace PartyModeForSpotify.Services
             }
         }
 
-        public async Task SetHostDeviceAsync(string deviceId)
+        public async Task SetPlaybackDeviceAsync(string deviceId)
         {
-            if (state.Value is PartySessionState.ActiveSession session)
+            if (stateSubject.Value is { IsActive: true } state)
             {
-                await session.SpotifyClient.Player.TransferPlayback(new PlayerTransferPlaybackRequest(new[] { deviceId }));
-                logger.LogInformation(nameof(SetHostDeviceAsync) + " {DeviceId}", deviceId);
+                await state.SpotifyClient.Player.TransferPlayback(new PlayerTransferPlaybackRequest(new[] { deviceId }));
+                logger.LogInformation(nameof(SetPlaybackDeviceAsync) + " {DeviceId}", deviceId);
             }
         }
 
         public async Task<IReadOnlyList<FullTrack>> SearchAsync(string searchText)
         {
-            if (state.Value is PartySessionState.ActiveSession session && ! string.IsNullOrWhiteSpace(searchText))
+            if (stateSubject.Value is { IsActive: true } state && !string.IsNullOrWhiteSpace(searchText))
             {
-                var searchResponse = await session.SpotifyClient.Search.Item(new SearchRequest(SearchRequest.Types.Track, searchText));
+                var searchResponse = await state.SpotifyClient.Search.Item(new SearchRequest(SearchRequest.Types.Track, searchText));
                 return searchResponse.Tracks.Items ?? (IReadOnlyList<FullTrack>)ImmutableList<FullTrack>.Empty;
             }
 
@@ -100,14 +98,14 @@ namespace PartyModeForSpotify.Services
 
         public async Task EnqueueTrackAsync(FullTrack track)
         {
-            if (state.Value is PartySessionState.ActiveSession session)
+            if (stateSubject.Value is { IsActive: true } state)
             {
-                state.OnNext(session with
+                stateSubject.OnNext(state with
                 {
-                    Queue = session.Queue.Enqueue(track)
+                    Queue = state.Queue.Enqueue(track)
                 });
 
-                if (session.CurrentTrack is null)
+                if (state.CurrentTrack is null)
                     await SkipToNextTrackAsync();
 
                 logger.LogInformation(nameof(EnqueueTrackAsync) + " '{TrackName}' ({TrackUri})", track.Name, track.Uri);
@@ -116,19 +114,19 @@ namespace PartyModeForSpotify.Services
 
         public async Task SkipToNextTrackAsync()
         {
-            if (state.Value is PartySessionState.ActiveSession session)
+            if (stateSubject.Value is { IsActive: true } state)
             {
-                if (session.Queue.IsEmpty)
+                if (state.Queue.IsEmpty)
                     return;
 
-                var remainingQueue = session.Queue.Dequeue(out var track);
+                var remainingQueue = state.Queue.Dequeue(out var track);
 
-                await session.SpotifyClient.Player.ResumePlayback(new PlayerResumePlaybackRequest
+                await state.SpotifyClient.Player.ResumePlayback(new PlayerResumePlaybackRequest
                 {
                     Uris = new[] { track.Uri },
                 });
 
-                state.OnNext(session with
+                stateSubject.OnNext(state with
                 {
                     CurrentTrack = track,
                     Queue = remainingQueue
@@ -140,8 +138,8 @@ namespace PartyModeForSpotify.Services
 
         public void Dispose()
         {
-            state.OnNext(new PartySessionState.ClosedSession());
-            state.OnCompleted();
+            stateSubject.OnNext(stateSubject.Value with { IsActive = false });
+            stateSubject.OnCompleted();
             loggerScope.Dispose();
             disposeCallback();
         }

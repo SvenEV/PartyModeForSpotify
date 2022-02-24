@@ -2,12 +2,14 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 8px;
+    border-radius: 12px;
 }
 
 .album-cover {
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     border-radius: 8px;
+    margin: 4px;
 }
 
 .album-cover-placeholder {
@@ -44,4 +46,5 @@
 
 .actions {
     display: grid;
+    margin: 4px;
 }

@@ -1,9 +1,0 @@
-﻿.track-list {
-    overflow: auto;
-}
-
-.inner {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}

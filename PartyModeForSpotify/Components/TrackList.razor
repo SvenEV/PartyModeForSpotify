@@ -1,0 +1,18 @@
+﻿<div class="track-list">
+    @foreach (var track in Tracks ?? Enumerable.Empty<FullTrack>())
+    {
+        <TrackInfo Track="track">
+            <Actions>
+                @Actions?.Invoke(track)
+            </Actions>
+        </TrackInfo>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IEnumerable<FullTrack>? Tracks { get; set; }
+
+    [Parameter]
+    public RenderFragment<FullTrack>? Actions { get; set; }
+}

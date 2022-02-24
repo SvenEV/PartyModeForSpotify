@@ -1,0 +1,21 @@
+﻿<button @onclick="args => Click.InvokeAsync(args)" type="@(IsSubmit ? "submit" : "button")">
+    @if (Icon.HasValue)
+    {
+        <span class="icon">@Icon</span>
+    }
+    @Text
+</button>
+
+@code {
+    [Parameter]
+    public char? Icon { get; set; }
+
+    [Parameter]
+    public string Text { get; set; } = "";
+
+    [Parameter]
+    public bool IsSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> Click { get; set; }
+}

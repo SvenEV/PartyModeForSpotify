@@ -11,33 +11,34 @@
                       PlayerName="@context.Session.Title"
                       Ready="async playerInfo => await OnPlayerReadyAsync(playerInfo, context.Session)"
                       PlayerStateChanged="async state => await OnPlayerStateChangedAsync(state, context.Session)"
-                      @bind-IsPaused="isPaused"
-                      @ref="webPlayer" />
+                      @bind-IsPaused="isPaused" />
 
     <h2>Currently playing</h2>
 
     <div class="controls">
-        <button @onclick="() => volume = Math.Max(0, volume - .1)">
-            <span class="icon">&#xE767;</span> -
-        </button>
-        <button @onclick="() => volume = Math.Min(1, volume + .1)">
-            <span class="icon">&#xE767;</span> +
-        </button>
-        <button @onclick="() => context.Session.SkipToNextTrackAsync()">
-            <span class="icon">&#xE893;</span> Skip
-        </button>
+        <Button Click="() => volume = Math.Max(0, volume - .1)"
+                Icon="Icons.Volume"
+                Text="-" />
+
+        <Button Click="() => volume = Math.Min(1, volume + .1)"
+                Icon="Icons.Volume"
+                Text="+" />
+
+        <Button Click="() => context.Session.SkipToNextTrackAsync()"
+                Icon="Icons.Next"
+                Text="Skip" />
 
         @if (isPaused)
         {
-            <button @onclick="() => isPaused = false">
-                <span class="icon">&#xE768;</span> Play
-            </button>
+            <Button Click="() => isPaused = false"
+                Icon="Icons.Play"
+                Text="Play" />
         }
         else
         {
-            <button @onclick="() => isPaused = true">
-                <span class="icon">&#xE769;</span> Pause
-            </button>
+            <Button Click="() => isPaused = true"
+                Icon="Icons.Pause"
+                Text="Pause" />
         }
     </div>
 
@@ -50,8 +51,6 @@
 </PartySessionPage>
 
 @code {
-    private SpotifyWebPlayer? webPlayer;
-
     private double volume = .5;
     private bool isPaused = false;
     private WebPlaybackState? previousState = null;
@@ -61,7 +60,7 @@
 
     private async Task OnPlayerReadyAsync(WebPlaybackPlayer playerInfo, PartySession session)
     {
-        await session.SetHostDeviceAsync(playerInfo.DeviceId);
+        await session.SetPlaybackDeviceAsync(playerInfo.DeviceId);
     }
 
     private async Task OnPlayerStateChangedAsync(WebPlaybackState state, PartySession session)

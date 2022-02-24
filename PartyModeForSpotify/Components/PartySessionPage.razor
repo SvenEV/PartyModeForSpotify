@@ -6,27 +6,21 @@
     <div class="root">
         <header>
             <h1>@session.Title</h1>
-
-            <div class="qr-code">
-                <img src="@session.QRCode">
-            </div>
+            <div class="qr-code" style="background-image: url(@session.QRCode)"></div>
         </header>
-        @switch (sessionState)
-        {
-            case PartySessionState.UninitializedSession:
-                <div class="session-error">Session not initialized</div>
-                break;
-
-            case PartySessionState.BrokenSession state:
-                <div class="session-error">Party broken: @state.Exception</div>
-                break;
-
-            case PartySessionState.ActiveSession state:
-                <main>
-                    @ChildContent?.Invoke(new PartySessionArgs(session, state))
-                </main>
-                break;
-        }
+        <main>
+            @if (sessionState is not null)
+            {
+                if (sessionState.IsActive)
+                {
+                    @ChildContent?.Invoke(new PartySessionArgs(session, sessionState))
+                }
+                else
+                {
+                    @:The session is no longer available.
+                }
+            }
+        </main>
     </div>
 }
 else
@@ -36,10 +30,10 @@ else
 
 @code {
     private PartySession? session;
-    private PartySessionState sessionState = new PartySessionState.UninitializedSession();
+    private PartySessionState? sessionState = null;
     private IDisposable? sessionStateSubscription;
 
-    public record PartySessionArgs(PartySession Session, PartySessionState.ActiveSession State);
+    public record PartySessionArgs(PartySession Session, PartySessionState State);
 
     [Parameter]
     public Guid SessionId { get; set; }

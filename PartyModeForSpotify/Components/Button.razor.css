@@ -1,0 +1,26 @@
+﻿.icon {
+    font-family: 'SegoeMDL2';
+    font-size: 12pt;
+    vertical-align: bottom;
+    margin-right: 6px;
+}
+
+button {
+    background: none;
+    outline: none;
+    border: none;
+    color: white;
+    border: 1px solid white;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+    button:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    button:active {
+        background: rgba(255, 255, 255, 0.2);
+        border-width: 2px;
+        padding: 11px;
+    }
