@@ -1,11 +1,13 @@
 ﻿<div class="track-list">
     @foreach (var track in Tracks ?? Enumerable.Empty<FullTrack>())
     {
-        <TrackInfo Track="track">
-            <Actions>
+        <div class="track-list-item">
+            <TrackInfo Track="track" />
+            
+            <div class="actions">
                 @Actions?.Invoke(track)
-            </Actions>
-        </TrackInfo>
+            </div>
+        </div>
     }
 </div>
 

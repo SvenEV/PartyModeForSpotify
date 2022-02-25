@@ -1,15 +1,13 @@
 ﻿.track {
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 8px;
-    border-radius: 12px;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
 }
 
 .album-cover {
     width: 72px;
     height: 72px;
     border-radius: 8px;
-    margin: 4px;
 }
 
 .album-cover-placeholder {
@@ -42,9 +40,4 @@
     font-size: smaller;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.actions {
-    display: grid;
-    margin: 4px;
 }
