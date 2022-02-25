@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using PartyModeForSpotify;
 using PartyModeForSpotify.Services;
 
@@ -12,6 +13,16 @@ builder.Services.AddSingleton<SessionManager>();
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
+
+// Validate configuration
+var config = app.Services.GetRequiredService<IOptions<SpotifyConfiguration>>();
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+if (string.IsNullOrEmpty(config.Value.ClientId))
+    logger.LogError("Incomplete configuration: ClientId is not configured");
+
+if (string.IsNullOrEmpty(config.Value.ClientSecret))
+    logger.LogError("Incomplete configuration: ClientSecret is not configured");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
