@@ -50,7 +50,8 @@
         volume = Volume;
 
         selfRef = DotNetObjectReference.Create(this);
-        module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/SpotifyWebPlaybackSdk/spotify.js");
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/SpotifyWebPlaybackSdk/SpotifyWebPlayer.razor.js");
+        await JS.InvokeAsync<IJSObjectReference>("import", "https://sdk.scdn.co/spotify-player.js");
         await module!.InvokeVoidAsync("initialize", selfRef, PlayerName, Volume, AccessToken);
     }
 
