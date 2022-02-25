@@ -2,7 +2,7 @@
     @foreach (var track in Tracks ?? Enumerable.Empty<FullTrack>())
     {
         <div class="track-list-item">
-            <TrackInfo Track="track" />
+            @track.Name
             
             <div class="actions">
                 @Actions?.Invoke(track)

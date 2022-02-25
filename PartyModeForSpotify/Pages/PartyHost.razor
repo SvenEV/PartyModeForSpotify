@@ -42,7 +42,7 @@
         }
     </div>
 
-    <TrackInfo Track="context.State.CurrentTrack" />
+    @(context.State.CurrentTrack?.Name ?? "(Nothing)")
 
     <h2>Up next</h2>
 
