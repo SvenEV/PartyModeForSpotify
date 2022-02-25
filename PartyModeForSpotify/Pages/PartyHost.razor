@@ -6,13 +6,6 @@
 
 <PartySessionPage SessionId="SessionId">
 
-    <SpotifyWebPlayer Volume="volume"
-                      AccessToken="@context.State.AccessToken"
-                      PlayerName="@context.Session.Title"
-                      Ready="async playerInfo => await OnPlayerReadyAsync(playerInfo, context.Session)"
-                      PlayerStateChanged="async state => await OnPlayerStateChangedAsync(state, context.Session)"
-                      @bind-IsPaused="isPaused" />
-
     <h2>Currently playing</h2>
 
     <div class="controls">
@@ -53,26 +46,7 @@
 @code {
     private double volume = .5;
     private bool isPaused = false;
-    private WebPlaybackState? previousState = null;
 
     [Parameter]
     public Guid SessionId { get; set; }
-
-    private async Task OnPlayerReadyAsync(WebPlaybackPlayer playerInfo, PartySession session)
-    {
-        await session.SetPlaybackDeviceAsync(playerInfo.DeviceId);
-    }
-
-    private async Task OnPlayerStateChangedAsync(WebPlaybackState state, PartySession session)
-    {
-        var prevState = previousState;
-        previousState = state;
-
-        if (prevState is not null && state is not null &&
-            prevState.TrackWindow.CurrentTrack?.Id == state.TrackWindow.CurrentTrack?.Id &&
-            prevState.PositionMilliseconds > 0 && state.PositionMilliseconds == 0)
-        {
-            await session.SkipToNextTrackAsync();
-        }
-    }
 }
